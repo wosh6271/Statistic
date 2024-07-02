@@ -1,0 +1,523 @@
+#Load data
+library(readxl)
+library(writexl)
+library(xlsx)
+data = read_xlsx("data.xlsx")
+data = data.frame(data)
+
+
+#Variable Transformation
+data[,2]=ifelse(data[,2]=="남",1,ifelse(data[,2]=="여",2,3))
+data[,4]=ifelse(data[,4]=="대학생",1,ifelse(data[,4]=="대학원생",2,ifelse(data[,4]=="취업준비생",3,ifelse(data[,4]=="직업인",4,0))))
+data[,24:109] = ifelse(data[,24:109]=="매우 그렇다",4,ifelse(data[,24:109]=="다소 그렇다",3,ifelse(data[,24:109]=="다소 아니다",2,1)))
+data[,2] = as.factor(data[,2])
+data[,4] = as.factor(data[,4])
+
+
+#Missing value handling
+library(DMwR)
+set.seed(1234)
+data = knnImputation(data,k=10)
+
+
+#Create variable
+HIGH = cbind(data[,"high1"],data[,"high2"],data[,"high3"],data[,"high4"],data[,"high5"],data[,"high6"],data[,"high7"])
+HIGH = data.frame(HIGH)
+HIGH = rowMeans(HIGH[,1:7])
+data$HIGH = HIGH
+
+DIS = cbind(data[,"dis1"],data[,"dis2"],data[,"dis3"],data[,"dis4"],data[,"dis5"],data[,"dis6"],data[,"dis7"],data[,"dis8"],data[,"dis9"],data[,"dis10"],data[,"dis11"],data[,"dis12"])
+DIS = data.frame(DIS)
+DIS = rowMeans(DIS[,1:12])
+data$DIS = DIS
+
+SUPERV = cbind(data[,"Fsuperv1"],data[,"Fsuperv2"],data[,"Fsuperv3"],data[,"Fsuperv4"],data[,"Msuperv1"],data[,"Msuperv2"],data[,"Msuperv3"],data[,"Msuperv4"])
+SUPERV = data.frame(SUPERV)
+SUPERV = rowMeans(SUPERV[,1:8])
+data$SUPERV = SUPERV
+
+EXPLAIN = cbind(data[,"Fexplain1"],data[,"Fexplain2"],data[,"Fexplain3"],data[,"Fexplain4"],data[,"Fexplain5"],data[,"Mexplain1"],data[,"Mexplain2"],data[,"Mexplain3"],data[,"Mexplain4"],data[,"Mexplain5"])
+EXPLAIN = data.frame(EXPLAIN)
+EXPLAIN = rowMeans(EXPLAIN[,1:10])
+data$EXPLAIN = EXPLAIN
+
+INCONSIST = cbind(data[,"Finconsist1"],data[,"Finconsist2"],data[,"Finconsist3"],data[,"Finconsist4"],data[,"Minconsist1"],data[,"Minconsist2"],data[,"Minconsist3"],data[,"Minconsist4"])
+INCONSIST = data.frame(INCONSIST)
+INCONSIST = rowMeans(INCONSIST[,1:8])
+data$INCONSIST = INCONSIST
+
+EXPECT = cbind(data[,"Fexpect1"],data[,"Fexpect2"],data[,"Fexpect3"],data[,"Fexpect4"],data[,"Fexpect5"],data[,"Fexpect6"],data[,"Mexpect1"],data[,"Mexpect2"],data[,"Mexpect3"],data[,"Mexpect4"],data[,"Mexpect5"],data[,"Mexpect6"])
+EXPECT = data.frame(EXPECT)
+EXPECT = rowMeans(EXPECT[,1:12])
+data$EXPECT = EXPECT
+
+INTERFERE = cbind(data[,"Finterfere1"],data[,"Finterfere2"],data[,"Finterfere3"],data[,"Finterfere4"],data[,"Finterfere5"],data[,"Finterfere6"],data[,"Finterfere7"],data[,"Minterfere1"],data[,"Minterfere2"],data[,"Minterfere3"],data[,"Minterfere4"],data[,"Minterfere5"],data[,"Minterfere6"],data[,"Minterfere7"])
+INTERFERE = data.frame(INTERFERE)
+INTERFERE = rowMeans(INTERFERE[,1:14])
+data$INTERFERE = INTERFERE
+
+ABUSE = cbind(data[,"Fabuse1"],data[,"Fabuse2"],data[,"Fabuse3"],data[,"Fabuse4"],data[,"Fabuse5"],data[,"Fabuse6"],data[,"Mabuse1"],data[,"Mabuse2"],data[,"Mabuse3"],data[,"Mabuse4"],data[,"Mabuse5"],data[,"Mabuse6"])
+ABUSE = data.frame(ABUSE)
+ABUSE = rowMeans(ABUSE[,1:12])
+data$ABUSE = ABUSE
+
+NEGLECT = cbind(data[,"Fneglect1"],data[,"Fneglect2"],data[,"Fneglect3"],data[,"Fneglect4"],data[,"Fneglect5"],data[,"Mneglect1"],data[,"Mneglect2"],data[,"Mneglect3"],data[,"Mneglect4"],data[,"Mneglect5"])
+NEGLECT = data.frame(NEGLECT)
+NEGLECT = rowMeans(NEGLECT[,1:10])
+data$NEGLECT = NEGLECT
+
+AFFECT = cbind(data[,"Faffect1"],data[,"Faffect2"],data[,"Faffect3"],data[,"Faffect4"],data[,"Faffect5"],data[,"Faffect6"],data[,"Maffect1"],data[,"Maffect2"],data[,"Maffect3"],data[,"Maffect4"],data[,"Maffect5"],data[,"Maffect6"])
+AFFECT = data.frame(AFFECT)
+AFFECT = rowMeans(AFFECT[,1:12])
+data$AFFECT = AFFECT
+
+SOCIAL = cbind(data[,"social1"],data[,"social2"],data[,"social3"],data[,"social4"],data[,"social5"])
+SOCIAL = data.frame(SOCIAL)
+SOCIAL = rowMeans(SOCIAL[,1:5])
+data$SOCIAL = SOCIAL
+
+CONTROL = cbind(data[,"control1"],data[,"control2"],data[,"control3"],data[,"control4"],data[,"control5"])
+CONTROL = data.frame(CONTROL)
+CONTROL = rowMeans(CONTROL[,1:5])
+data$CONTROL = CONTROL
+
+NEGET = cbind(data[,"neget1"],data[,"neget2"],data[,"neget3"],data[,"neget4"],data[,"neget5"])
+NEGET = data.frame(NEGET)
+NEGET = rowMeans(NEGET[,1:5])
+data$NEGET = NEGET
+
+SUPPRESS = cbind(data[,"suppress1"],data[,"suppress2"],data[,"suppress3"],data[,"suppress4"],data[,"suppress5"])
+SUPPRESS = data.frame(SUPPRESS)
+SUPPRESS = rowMeans(SUPPRESS[,1:5])
+data$SUPPRESS = SUPPRESS
+
+ACTIVE = cbind(data[,"active1"],data[,"active2"],data[,"active3"],data[,"active4"])
+ACTIVE = data.frame(ACTIVE)
+ACTIVE = rowMeans(ACTIVE[,1:4])
+data$ACTIVE = ACTIVE
+
+MERIT = cbind(data[,"merit1"],data[,"merit2"],data[,"merit3"],data[,"merit4"],data[,"merit5"])
+MERIT = data.frame(MERIT)
+MERIT = rowMeans(MERIT[,1:5])
+data$MERIT = MERIT
+
+SATIS = cbind(data[,"satis1"],data[,"satis2"],data[,"satis3"])
+SATIS = data.frame(SATIS)
+SATIS = rowSums(SATIS[,1:3])
+data$SATIS = SATIS
+
+PEMO = cbind(data[,"pemo1"],data[,"pemo2"],data[,"pemo3"])
+PEMO = data.frame(PEMO)
+PEMO = rowSums(PEMO[,1:3])
+data$PEMO = PEMO
+
+NEMO = cbind(data[,"nemo1"],data[,"nemo2"],data[,"nemo3"])  
+NEMO = data.frame(NEMO)
+NEMO = rowSums(NEMO[,1:3])
+data$NEMO = NEMO
+
+HAPPY = SATIS+PEMO-NEMO
+data$HAPPY = HAPPY
+
+TCOMPLEX = cbind(data[,"complex1"],data[,"complex2"],data[,"complex3"],data[,"complex4"],data[,"complex5"],data[,"complex6"])
+TCOMPLEX = data.frame(TCOMPLEX)
+TCOMPLEX = rowMeans(TCOMPLEX[,1:6])
+data$TCOMPLEX = TCOMPLEX
+
+
+#Internal consistency
+library("ltm")
+library("psych")
+library("xlsx")
+
+HIGH = cbind(data[,"high1"],data[,"high2"],data[,"high3"],data[,"high4"],data[,"high5"],data[,"high6"],data[,"high7"])
+HIGH = data.frame(HIGH)
+a_HIGH <- descript(HIGH)['alpha']
+write.xlsx(a_HIGH,"a_HIGH.xlsx")
+
+DIS = cbind(data[,"dis1"],data[,"dis2"],data[,"dis3"],data[,"dis4"],data[,"dis5"],data[,"dis6"],data[,"dis7"],data[,"dis8"],data[,"dis9"],data[,"dis10"],data[,"dis11"],data[,"dis12"])
+DIS = data.frame(DIS)
+a_DIS <- descript(DIS)['alpha']
+write.xlsx(a_DIS,"a_DIS.xlsx")
+
+SUPERV = cbind(data[,"Fsuperv1"],data[,"Fsuperv2"],data[,"Fsuperv3"],data[,"Fsuperv4"],data[,"Msuperv1"],data[,"Msuperv2"],data[,"Msuperv3"],data[,"Msuperv4"])
+SUPERV = data.frame(SUPERV)
+a_SUPERV <- descript(SUPERV)['alpha']
+write.xlsx(a_SUPERV,"a_SUPERV.xlsx")
+
+EXPLAIN = cbind(data[,"Fexplain1"],data[,"Fexplain2"],data[,"Fexplain3"],data[,"Fexplain4"],data[,"Fexplain5"],data[,"Mexplain1"],data[,"Mexplain2"],data[,"Mexplain3"],data[,"Mexplain4"],data[,"Mexplain5"])
+EXPLAIN = data.frame(EXPLAIN)
+a_EXPLAIN <- descript(EXPLAIN)['alpha']
+write.xlsx(a_EXPLAIN,"a_EXPLAIN.xlsx")
+
+INCONSIST = cbind(data[,"Finconsist1"],data[,"Finconsist2"],data[,"Finconsist3"],data[,"Finconsist4"],data[,"Minconsist1"],data[,"Minconsist2"],data[,"Minconsist3"],data[,"Minconsist4"])
+INCONSIST = data.frame(INCONSIST)
+a_INCONSIST <- descript(INCONSIST)['alpha']
+write.xlsx(a_INCONSIST,"a_INCONSIST.xlsx")
+
+EXPECT = cbind(data[,"Fexpect1"],data[,"Fexpect2"],data[,"Fexpect3"],data[,"Fexpect4"],data[,"Fexpect5"],data[,"Fexpect6"],data[,"Mexpect1"],data[,"Mexpect2"],data[,"Mexpect3"],data[,"Mexpect4"],data[,"Mexpect5"],data[,"Mexpect6"])
+EXPECT = data.frame(EXPECT)
+a_EXPECT <- descript(EXPECT)['alpha']
+write.xlsx(a_EXPECT,"a_EXPECT.xlsx")
+
+INTERFERE = cbind(data[,"Finterfere1"],data[,"Finterfere2"],data[,"Finterfere3"],data[,"Finterfere4"],data[,"Finterfere5"],data[,"Finterfere6"],data[,"Finterfere7"],data[,"Minterfere1"],data[,"Minterfere2"],data[,"Minterfere3"],data[,"Minterfere4"],data[,"Minterfere5"],data[,"Minterfere6"],data[,"Minterfere7"])
+INTERFERE = data.frame(INTERFERE)
+a_INTERFERE <- descript(INTERFERE)['alpha']
+write.xlsx(a_INTERFERE,"a_INTERFERE.xlsx")
+
+ABUSE = cbind(data[,"Fabuse1"],data[,"Fabuse2"],data[,"Fabuse3"],data[,"Fabuse4"],data[,"Fabuse5"],data[,"Fabuse6"],data[,"Mabuse1"],data[,"Mabuse2"],data[,"Mabuse3"],data[,"Mabuse4"],data[,"Mabuse5"],data[,"Mabuse6"])
+ABUSE = data.frame(ABUSE)
+a_ABUSE <- descript(ABUSE)['alpha']
+write.xlsx(a_ABUSE,"a_ABUSE.xlsx")
+
+NEGLECT = cbind(data[,"Fneglect1"],data[,"Fneglect2"],data[,"Fneglect3"],data[,"Fneglect4"],data[,"Fneglect5"],data[,"Mneglect1"],data[,"Mneglect2"],data[,"Mneglect3"],data[,"Mneglect4"],data[,"Mneglect5"])
+NEGLECT = data.frame(NEGLECT)
+a_NEGLECT <- descript(NEGLECT)['alpha']
+write.xlsx(a_NEGLECT,"a_NEGLECT.xlsx")
+
+AFFECT = cbind(data[,"Faffect1"],data[,"Faffect2"],data[,"Faffect3"],data[,"Faffect4"],data[,"Faffect5"],data[,"Faffect6"],data[,"Maffect1"],data[,"Maffect2"],data[,"Maffect3"],data[,"Maffect4"],data[,"Maffect5"],data[,"Maffect6"])
+AFFECT = data.frame(AFFECT)
+a_AFFECT <- descript(AFFECT)['alpha']
+write.xlsx(a_AFFECT,"a_AFFECT.xlsx")
+
+SOCIAL = cbind(data[,"social1"],data[,"social2"],data[,"social3"],data[,"social4"],data[,"social5"])
+SOCIAL = data.frame(SOCIAL)
+a_SOCIAL <- descript(SOCIAL)['alpha']
+write.xlsx(a_SOCIAL,"a_SOCIAL.xlsx")
+
+CONTROL = cbind(data[,"control1"],data[,"control2"],data[,"control3"],data[,"control4"],data[,"control5"])
+CONTROL = data.frame(CONTROL)
+a_CONTROL <- descript(CONTROL)['alpha']
+write.xlsx(a_CONTROL,"a_CONTROL.xlsx")
+
+NEGET = cbind(data[,"neget1"],data[,"neget2"],data[,"neget3"],data[,"neget4"],data[,"neget5"])
+NEGET = data.frame(NEGET)
+a_NEGET <- descript(NEGET)['alpha']
+write.xlsx(a_NEGET,"a_NEGET.xlsx")
+
+SUPPRESS = cbind(data[,"suppress1"],data[,"suppress2"],data[,"suppress3"],data[,"suppress4"],data[,"suppress5"])
+SUPPRESS = data.frame(SUPPRESS)
+a_SUPPRESS <- descript(SUPPRESS)['alpha']
+write.xlsx(a_SUPPRESS,"a_SUPPRESS.xlsx")
+
+ACTIVE = cbind(data[,"active1"],data[,"active2"],data[,"active3"],data[,"active4"])
+ACTIVE = data.frame(ACTIVE)
+a_ACTIVE <- descript(ACTIVE)['alpha']
+write.xlsx(a_ACTIVE,"a_ACTIVE.xlsx")
+
+MERIT = cbind(data[,"merit1"],data[,"merit2"],data[,"merit3"],data[,"merit4"],data[,"merit5"])
+MERIT = data.frame(MERIT)
+a_MERIT <- descript(MERIT)['alpha']
+write.xlsx(a_MERIT,"a_MERIT.xlsx")
+
+SATIS = cbind(data[,"satis1"],data[,"satis2"],data[,"satis3"])
+SATIS = data.frame(SATIS)
+a_SATIS <- descript(SATIS)['alpha']
+write.xlsx(a_SATIS,"a_SATIS.xlsx")
+
+PEMO = cbind(data[,"pemo1"],data[,"pemo2"],data[,"pemo3"])
+PEMO = data.frame(PEMO)
+a_PEMO <- descript(PEMO)['alpha']
+write.xlsx(a_PEMO,"a_PEMO.xlsx")
+
+NEMO = cbind(data[,"nemo1"],data[,"nemo2"],data[,"nemo3"])  
+NEMO = data.frame(NEMO)
+a_NEMO <- descript(NEMO)['alpha']
+write.xlsx(a_NEMO,"a_NEMO.xlsx")
+
+TCOMPLEX = cbind(data[,"complex1"],data[,"complex2"],data[,"complex3"],data[,"complex4"],data[,"complex5"],data[,"complex6"])
+TCOMPLEX = data.frame(TCOMPLEX)
+a_TCOMPLEX <- descript(TCOMPLEX)['alpha']
+write.xlsx(a_TCOMPLEX,"a_TCOMPLEX.xlsx")
+
+
+#Creating a dataset for basic analysis
+data_a = cbind(data[,1:4], data[,164:179], data[,183:184])
+data_a = data.frame(data_a)
+
+
+#Descriptive statistics
+library(psych)
+data_descriptive <- round(describe(data_a),2)
+data_descriptive = data.frame(data_descriptive)
+write.xlsx(data_descriptive,"data_descriptive.xlsx",row.names=TRUE)
+
+
+#Correlation analysis
+library(corrplot)
+corr = round(cor(data_a[,5:22]),2)
+corr = data.frame(corr)
+write.xlsx(corr,"corr.xlsx",row.names=TRUE)
+corr_p = cor.mtest(data_a[,5:22],method='pearson')
+corr_p = data.frame(corr_p)
+corr_p = data.frame(corr_p)
+write.xlsx(corr_p,"corr_p.xlsx",row.names=TRUE)
+
+
+#Latent Profile Analysis
+library(dplyr)
+library(tidyLPA)
+set.seed(1234)
+data_LPA = data %>%
+select(HIGH,DIS) %>%
+estimate_profiles(1:5, variances = "equal", covariances = "zero")
+data_LPA
+
+Class4 = data %>%
+select(HIGH,DIS) %>%
+estimate_profiles(4)
+plot_profiles(Class4)
+
+C = get_data(Class4)[,9]
+C = ifelse(C==1,"Adaptive",ifelse(C==2,"Negative",ifelse(C==3,"Non","Maladaptive")))
+C = as.factor(C)
+
+Class4$model_1_class_4  
+
+
+##Check detail Indices(ex. 3class)##
+#Class3 = data %>%       
+#select(HIGH,DIS) %>%   
+#estimate_profiles(3)      
+#plot_profiles(Class3)      
+#Class3$model_1_class_3
+
+
+
+# LPA Descriptive statistics
+LPA= cbind(C,data[,164:179],data[,183:184])
+colnames(LPA) = c("C", "HIGH", "DIS", "SUPERV", "EXPLAIN", "INCONSIST", "EXPECT", "INTERFERE", "ABUSE", "NEGLECT", "AFFECT", "SOCIAL", "CONTROL", "NEGET", "SUPPRESS", "ACTIVE", "MERIT", "HAPPY", "TCOMPLEX")
+LPA[,1]=as.factor(LPA[,1])
+LPA=data.frame(LPA)
+LPA$C = C
+library(psych)
+LPA <- describeBy(LPA[c("HIGH","DIS","SUPERV","EXPLAIN","INCONSIST","EXPECT","INTERFERE","ABUSE","NEGLECT","AFFECT","SOCIAL","CONTROL","NEGET","SUPPRESS","ACTIVE","MERIT","HAPPY","TCOMPLEX")],LPA$C,mat=TRUE)
+write.xlsx(LPA,"LPA.xlsx",row.names=TRUE,col.names=TRUE)
+
+
+# LPA figure value(Standardization)
+LPA_s = cbind(C,data[,164],data[,165])
+LPA_s[,2:3] = scale(LPA_s[,2:3])
+colnames(LPA_s) = c("C", "HIGH", "DIS")
+LPA_s[,1]=as.factor(LPA_s[,1])
+LPA_s = data.frame(LPA_s)
+LPA_s$C = C
+LPA_high <- summarise(group_by(LPA_s,C),n=n(),mean=mean(HIGH),sd=sd(HIGH))
+write.xlsx(LPA_high,"LPA_high.xlsx",row.names=TRUE,col.names=TRUE)
+LPA_dis <- summarise(group_by(LPA_s,C),n=n(),mean=mean(DIS),sd=sd(DIS))
+write.xlsx(LPA_dis,"LPA_dis.xlsx",row.names=TRUE,col.names=TRUE)
+
+
+#Create a dataset for group comparison
+data_F = cbind(C, data[,2:4], data[,164:179], data[,183:184])
+data_F = data.frame(data_F)
+colnames(data_F)=c("C","sex","age","status","HIGH","DIS","monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","negative","inhibition","activity","merito","happy","inferiority")
+data_F[,1]=as.factor(data_F[,1])
+
+
+#Analysis of Variance - Check sample normality and homoscedasticity
+library(lawstat)
+options(scipen=999)
+levene.test(data_F$HIGH, data_F$C)
+levene.test(data_F$DIS, data_F$C)
+levene.test(data_F$monitor, data_F$C)
+levene.test(data_F$reason, data_F$C)
+levene.test(data_F$inconsist, data_F$C)
+levene.test(data_F$expect, data_F$C)
+levene.test(data_F$intrusive, data_F$C)
+levene.test(data_F$abuse, data_F$C)
+levene.test(data_F$neglect, data_F$C)
+levene.test(data_F$affaction, data_F$C)
+levene.test(data_F$social, data_F$C)
+levene.test(data_F$control, data_F$C)
+levene.test(data_F$negative, data_F$C)
+levene.test(data_F$inhibition, data_F$C)
+levene.test(data_F$activity, data_F$C)
+levene.test(data_F$merito, data_F$C)
+levene.test(data_F$happy, data_F$C)
+levene.test(data_F$inferiority, data_F$C)
+
+
+#Analysis of Variance(parametric techniques) - ANOVA
+anova_DIS=aov(data_F$DIS~data_F$C, data=data_F)
+anova_inferiority=aov(data_F$inferiority~data_F$C, data=data_F)
+##ex) Use the ‘summary(anova_DIS)’ command to check detailed values.##
+
+
+#Post hoc(parametric techniques) - Scheffe
+library(DescTools)
+ScheffeTest(anova_DIS)
+ScheffeTest(anova_inferiority)
+
+
+#Analysis of Variance & Post hoc(Nonparametric techniques) - Kruskall-Wallis Test & Dunn
+library(dunn.test)
+dunn.test(data_F$HIGH, data_F$C, method = 'bonferroni')
+dunn.test(data_F$happy, data_F$C, method = 'bonferroni')
+dunn.test(data_F$monitor, data_F$C, method = 'bonferroni')
+dunn.test(data_F$reason, data_F$C, method = 'bonferroni')
+dunn.test(data_F$inconsist, data_F$C, method = 'bonferroni')
+dunn.test(data_F$expect, data_F$C, method = 'bonferroni')
+dunn.test(data_F$intrusive, data_F$C, method = 'bonferroni')
+dunn.test(data_F$abuse, data_F$C, method = 'bonferroni')
+dunn.test(data_F$neglect, data_F$C, method = 'bonferroni')
+dunn.test(data_F$affaction, data_F$C, method = 'bonferroni')
+dunn.test(data_F$social, data_F$C, method = 'bonferroni')
+dunn.test(data_F$control, data_F$C, method = 'bonferroni')
+dunn.test(data_F$negative, data_F$C, method = 'bonferroni')
+dunn.test(data_F$inhibition, data_F$C, method = 'bonferroni')
+dunn.test(data_F$activity, data_F$C, method = 'bonferroni')
+dunn.test(data_F$merito, data_F$C, method = 'bonferroni')
+
+
+#RandomForest - Adaptive Perfectionism
+data_F[,1] = ifelse(data_F[,1]=="Adaptive","Adaptive","Not_Adaptive")
+data_F[,1] = as.factor(data_F[,1])
+
+library(randomForest)
+set.seed(1234)
+rf.fit = randomForest(C~monitor+reason+inconsist+expect+intrusive+abuse+neglect+affaction+social+control+inhibition+activity+negative+merito, data= data_F)
+rf.plot = varImpPlot(rf.fit)[,1]
+VI.rf = abs(rf.plot)
+vi.rf = sort(VI.rf, decreasing = F)
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(AP)", cex.main = 2)
+
+png(filename = "RandomForest(AP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(AP)", cex.main = 2)
+dev.off()
+
+
+#SLV - Adaptive Perfectionism
+library(glmnet)
+VI.per.lasso = matrix(nrow = 1, ncol = ncol(data_F)-1)
+set.seed(1234)
+train.x = data.matrix(data_F[,c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")])
+train.y = data_F$C
+lasso.mod = cv.glmnet(train.x, train.y, alpha=1,family='binomial')
+opt.lambda = lasso.mod$lambda.1se
+LALO.mod = glmnet(train.x, train.y, alpha=1, lambda=opt.lambda,family='binomial')
+LALO.mod$a0
+a=LALO.mod$beta
+VI.per.lasso = abs(LALO.mod$beta[1:(ncol(data_F)-1)])
+names(VI.per.lasso) = c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(AP)", cex.main = 2)
+
+png(filename = "SLVI(AP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(AP)", cex.main = 2)
+dev.off()
+
+
+#RandomForest/SLV - Maladaptive Perfectionism
+data_F = cbind(C, data[,2:4], data[,164:179], data[,183:184])
+data_F = data.frame(data_F)
+colnames(data_F)=c("C","sex","age","status","HIGH","DIS","monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","negative","inhibition","activity","merito","happy","inferiority")
+data_F[,1] = ifelse(data_F[,1]=="Maladaptive","Maladaptive","Not_Maladaptive")
+data_F[,1]=as.factor(data_F[,1])
+
+set.seed(1234)
+rf.fit = randomForest(C~monitor+reason+inconsist+expect+intrusive+abuse+neglect+affaction+social+control+inhibition+activity+negative+merito, data= data_F)
+rf.plot = varImpPlot(rf.fit)[,1]
+VI.rf = abs(rf.plot)
+vi.rf = sort(VI.rf, decreasing = F)
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(MP)", cex.main = 2)
+
+png(filename = "RandomForest(MP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(MP)", cex.main = 2)
+dev.off()
+
+VI.per.lasso = matrix(nrow = 1, ncol = ncol(data_F)-1)
+set.seed(1234)
+train.x = data.matrix(data_F[,c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")])
+train.y = data_F$C
+lasso.mod = cv.glmnet(train.x, train.y, alpha=1,family='binomial')
+opt.lambda = lasso.mod$lambda.1se
+LALO.mod = glmnet(train.x, train.y, alpha=1, lambda=opt.lambda,family='binomial')
+LALO.mod$a0
+a=LALO.mod$beta
+VI.per.lasso = abs(LALO.mod$beta[1:(ncol(data_F)-1)])
+names(VI.per.lasso) = c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(MP)", cex.main = 2)
+
+png(filename = "SLVI(MP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(MP)", cex.main = 2)
+dev.off()
+
+
+#RandomForest/SLV - Non-Perfectionism
+data_F = cbind(C, data[,2:4], data[,164:179], data[,183:184])
+data_F = data.frame(data_F)
+colnames(data_F)=c("C","sex","age","status","HIGH","DIS","monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","negative","inhibition","activity","merito","happy","inferiority")
+data_F[,1] = ifelse(data_F[,1]=="Non","Non","Not_Non")
+data_F[,1]=as.factor(data_F[,1])
+
+set.seed(1234)
+rf.fit = randomForest(C~monitor+reason+inconsist+expect+intrusive+abuse+neglect+affaction+social+control+inhibition+activity+negative+merito, data= data_F)
+rf.plot = varImpPlot(rf.fit)[,1]
+VI.rf = abs(rf.plot)
+vi.rf = sort(VI.rf, decreasing = F)
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(NP)", cex.main = 2)
+
+png(filename = "RandomForest(NP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(NP)", cex.main = 2)
+dev.off()
+
+VI.per.lasso = matrix(nrow = 1, ncol = ncol(data_F)-1)
+set.seed(1234)
+train.x = data.matrix(data_F[,c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")])
+train.y = data_F$C
+lasso.mod = cv.glmnet(train.x, train.y, alpha=1,family='binomial')
+opt.lambda = lasso.mod$lambda.1se
+LALO.mod = glmnet(train.x, train.y, alpha=1, lambda=opt.lambda,family='binomial')
+LALO.mod$a0
+a=LALO.mod$beta
+VI.per.lasso = abs(LALO.mod$beta[1:(ncol(data_F)-1)])
+names(VI.per.lasso) = c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(NP)", cex.main = 2)
+
+png(filename = "SLVI(NP).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(NP)", cex.main = 2)
+dev.off()
+
+
+#RandomForest/SLV - Self-Doubt
+data_F = cbind(C, data[,2:4], data[,164:179], data[,183:184])
+data_F = data.frame(data_F)
+colnames(data_F)=c("C","sex","age","status","HIGH","DIS","monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","negative","inhibition","activity","merito","happy","inferiority")
+data_F[,1] = ifelse(data_F[,1]=="Negative","Negative","Not_Negative")
+data_F[,1]=as.factor(data_F[,1])
+
+set.seed(1234)
+rf.fit = randomForest(C~monitor+reason+inconsist+expect+intrusive+abuse+neglect+affaction+social+control+inhibition+activity+negative+merito, data= data_F)
+rf.plot = varImpPlot(rf.fit)[,1]
+VI.rf = abs(rf.plot)
+vi.rf = sort(VI.rf, decreasing = F)
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(SD)", cex.main = 2)
+
+png(filename = "RandomForest(SD).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(t(vi.rf)[1,], horiz=T, las=1, col="red", main = "RandomForest(SD)", cex.main = 2)
+dev.off()
+
+VI.per.lasso = matrix(nrow = 1, ncol = ncol(data_F)-1)
+set.seed(1234)
+train.x = data.matrix(data_F[,c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")])
+train.y = data_F$C
+lasso.mod = cv.glmnet(train.x, train.y, alpha=1,family='binomial')
+opt.lambda = lasso.mod$lambda.1se
+LALO.mod = glmnet(train.x, train.y, alpha=1, lambda=opt.lambda,family='binomial')
+LALO.mod$a0
+a=LALO.mod$beta
+VI.per.lasso = abs(LALO.mod$beta[1:(ncol(data_F)-1)])
+names(VI.per.lasso) = c("monitor","reason","inconsist","expect","intrusive","abuse","neglect","affaction","social","control","inhibition","activity","negative","merito")
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(SD)", cex.main = 2)
+
+png(filename = "SLVI(SD).png", width=800, height = 800)
+par(oma=c(0,5,0,5))
+barplot(sort(VI.per.lasso), horiz=T, las=1, col="blue", main = "SLVI(SD)", cex.main = 2)
+dev.off()
